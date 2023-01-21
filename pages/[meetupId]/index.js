@@ -1,31 +1,42 @@
 import MeetupDetail from "../../components/meetups/meetup-detail";
 
-const MeetupDetails = () => {
+const MeetupDetails = (props) => {
   return (
     <MeetupDetail
-      image="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg"
-      title="First Meetup"
-      address="Some Street 5, Some City"
-      description="This is a first meetup"
+      image={props.meetupData.image}
+      title={props.meetupData.title}
+      address={props.meetupData.address}
+      description={props.meetupData.description}
     />
   );
 };
 
 export async function getStaticPaths() {
+  const response = await fetch(
+    `https://meetings-handler-default-rtdb.europe-west1.firebasedatabase.app/meetings.json`
+  );
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Could not fetch quotes.");
+  }
+
+  const transformedQuotes = [];
+
+  for (const key in data) {
+    const quoteObj = {
+      id: key,
+      ...data[key],
+    };
+
+    transformedQuotes.push(quoteObj);
+  }
+
   return {
-    fallback: false,
-    paths: [
-      {
-        params: {
-          meetupId: "m1",
-        },
-      },
-      {
-        params: {
-          meetupId: "m2",
-        },
-      },
-    ],
+    fallback: "blocking",
+    paths: transformedQuotes.map((meetup) => ({
+      params: { meetupId: meetup.id.toString() },
+    })),
   };
 }
 
@@ -34,15 +45,28 @@ export async function getStaticProps(context) {
 
   const meetupId = context.params.meetupId;
 
+  const response = await fetch(
+    `https://meetings-handler-default-rtdb.europe-west1.firebasedatabase.app/meetings/${meetupId}.json`
+  );
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Could not fetch quote.");
+  }
+
+  const loadedQuote = {
+    id: meetupId,
+    ...data,
+  };
+
   return {
     props: {
       meetupData: {
-        image:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Stadtbild_M%C3%BCnchen.jpg/1280px-Stadtbild_M%C3%BCnchen.jpg",
-        id: meetupId,
-        title: "First Meetup",
-        address: "Some Street 5, Some City",
-        description: "This is a first meetup",
+        id: loadedQuote.toString(),
+        title: loadedQuote.title,
+        address: loadedQuote.address,
+        image: loadedQuote.image,
+        description: loadedQuote.description,
       },
     },
   };
