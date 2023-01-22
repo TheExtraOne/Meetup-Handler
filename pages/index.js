@@ -1,4 +1,5 @@
 import MeetupList from "../components/meetups/meetup-list";
+import MEETINGSAPI from "@/api/api";
 
 // const DUMMY_MEETUPS = [
 //   {
@@ -24,9 +25,7 @@ const HomePage = (props) => {
 };
 
 export async function getStaticProps() {
-  const response = await fetch(
-    `https://meetings-handler-default-rtdb.europe-west1.firebasedatabase.app/meetings.json`
-  );
+  const response = await fetch(`${MEETINGSAPI}/meetings.json`);
   const data = await response.json();
 
   if (!response.ok) {

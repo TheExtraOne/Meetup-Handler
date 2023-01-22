@@ -1,4 +1,5 @@
 import MeetupDetail from "../../components/meetups/meetup-detail";
+import MEETINGSAPI from "@/api/api";
 
 const MeetupDetails = (props) => {
   return (
@@ -12,9 +13,7 @@ const MeetupDetails = (props) => {
 };
 
 export async function getStaticPaths() {
-  const response = await fetch(
-    `https://meetings-handler-default-rtdb.europe-west1.firebasedatabase.app/meetings.json`
-  );
+  const response = await fetch(`${MEETINGSAPI}/meetings.json`);
   const data = await response.json();
 
   if (!response.ok) {
@@ -45,9 +44,7 @@ export async function getStaticProps(context) {
 
   const meetupId = context.params.meetupId;
 
-  const response = await fetch(
-    `https://meetings-handler-default-rtdb.europe-west1.firebasedatabase.app/meetings/${meetupId}.json`
-  );
+  const response = await fetch(`${MEETINGSAPI}/meetings/${meetupId}.json`);
   const data = await response.json();
 
   if (!response.ok) {
